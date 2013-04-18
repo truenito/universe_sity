@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>UniverseSity Application</title>
+	<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.css" />
+	<link rel="stylesheet" href="css/universesity.css" />
+	<link rel="stylesheet" href="css/table.css" />
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.mobile-1.2.0.js"></script>
+
+	<script>
+
+
+
+    var databaseOptions = {
+      filenombre: "UniverseSityDB",
+      version: "1.0",
+      displaynombre: "UniverseSityDB",
+      maxSize: 1024
+    };
+ 
+    var database = openDatabase(
+      databaseOptions.filenombre,
+      databaseOptions.version,
+      databaseOptions.displaynombre,
+      databaseOptions.maxSize
+    );
+	
+/*	 var deletePendiente = function(callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "DELETE FROM Pendientes"
+            ),
+            [],
+            function(){
+              callback();
+            }
+          );
+ 
+        }
+      );
+    };  
+	*/
+	
+ 
+
+    var getPendientes = function( callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "SELECT " +
+                "* " +
+              "FROM " +
+                "Pendientes " +
+              "ORDER BY " +
+                "nombre ASC"
+            ),
+            [],
+            function( transaction, results ){
+              callback( results );
+            }
+          );
+ 
+        }
+      );
+    };
+	
+   var deletePendiente = function(callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "DELETE FROM " +
+				"Pendientes"
+            ),
+            [],
+            function(){
+              callback();
+            }
+          );
+ 
+        }
+      );
+    };  
+	
+
+ 
+     $(function(){
+      var form = $( "form" ); 
+      //var list = $( "#Pendientes" ); 
+	  var tabla = $( "#tablePendientes > tbody:last" );
+      //var clearPendientes = $( "#clearPendientes" ); 
+      var refreshPendientes = function( results ){
+        tabla.empty(); 
+        if (!results){
+          return;
+        } 
+		
+		var i = 1;
+		var bg = '';
+		var d ='delete';
+		var e='edit';
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+	        if(i%2 != 0){bg = '#eeeeee;';} else{bg = '#ffffff;';}			
+      	    tabla.append("<tr style='background-color:"+bg+"'><td>" + row.nombre + "</td><td>" + row.descripcion + "</td><td><a href='agregarPendientes.html?id="+row.id_pendiente+"&action="+e+"' rel='external'><img src='images/edit.png' /> </a><a href='Pendientes.html?id="+row.id_pendiente+"&action="+d+"' rel='external'><img src='images/delete.png' id='delPendiente' /></a></td></tr>");
+            i++;
+				  
+          }
+        );
+      };
+ 
+ 
+      form.submit(
+        function( event ){
+          event.preventDefault();
+ 
+          guardarPendiente(
+            form.find( "input.nombre" ).val(),
+            form.find( "input.descripcion" ).val(),
+            function(){
+              form.find( "input.nombre" ).val( "" );
+              form.find( "input.descripcion" ).val( "" ).focus();
+              getPendientes( refreshPendientes );
+
+              window.location="index.html";
+            }
+          );
+        }
+      );
+	  
+ 
+
+      getPendientes( refreshPendientes );
+	  
+	 var delPendiente = $("img #delPendiente");
+     delPendiente.click(
+        function( event ){
+          event.preventDefault();
+
+	      var id = getUrlVars()["id"];
+		  alert(id);
+			var action = getUrlVars()["action"];
+			if (id != "" && action != "") {
+
+				if(action == "delete")
+				{
+					deletePendiente( refreshPendientes );
+
+				}
+			} 
+		  
+		  
+		  
+		  
+		}		  
+
+      );		  
+	 
+	  
+    });
+	
+	/*var delPendiente = $("#delPendiente");
+     delPendiente.click(
+        function( event ){
+          event.preventDefault();
+		  
+		  */
+	
+	/*       var id = getUrlVars()["id"];
+			var action = getUrlVars()["action"];
+			if (id != "" && action != "") {
+
+				if(action == "delete")
+				{
+					deletePendiente();
+
+				}
+			} */ 
+			
+		//}		  
+
+      //);
+	  	
+	
+	
+	function getUrlVars()
+	{
+		var vars = [], hash;
+		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+		for(var i = 0; i < hashes.length; i++)
+		{
+			hash = hashes[i].split('=');
+			vars.push(hash[0]);
+			vars[hash[0]] = hash[1];
+		}
+		return vars;
+	}	
+	
+
+	</script>
+	
+	
+</head>
+
+
+<body>
+<div data-role="page" class="type-home" data-nobackbtn="false">
+	<div data-role="content">
+		<div class="content-secondary">
+			<div id="jqm-homeheader">
+				<p><img src="images/logo.png" style="width:297px; height:52px"></p>
+			</div>
+			<p class="intro"> Bienvenido a <strong>UniverseSity</strong> una aplicación de PhoneGap desarrollada por los alumnos Gabriel González & Carlos Adames.</p>
+			<div data-role="header">
+				<a rel="external" href="index.html" data-icon="back">Regresar</a>
+				<h1>Pendientes</h1>
+				<a rel="external" href="agregarPendientes.html" data-icon="plus">Agregar</a>
+			</div>
+			
+			
+			
+			<table width="100%" data-role="table" id="tablePendientes" data-mode="columntoggle" class="ui-body-d ui-shadow table-stripe ui-responsive" data-column-btn-theme="b" data-column-btn-text="Columns to display..." data-column-popup-theme="a">
+			  <thead >
+				<tr class="ui-bar-d">
+				  <th data-priority="1">Nombre</th>
+				  <th data-priority="2">Descripcion</th>
+				  <th data-priority="3">Acciones</th>
+				</tr>
+			  </thead>
+			  <tbody>
+				
+			   </tbody>
+			</table>			
+			<!--<ul data-role="listview" class="listPendientes" data-inset="true" data-theme="c" data-dividertheme="f" id="Pendientes"> 
+			 <li data-role="list-divider">Pendientes</li> 
+		    </ul>-->
+		<div class="content-secondary">
+
+		</div><!--/content-primary-->
+		</div>
+	</div>
+
+</div>
+</body>
+</html>

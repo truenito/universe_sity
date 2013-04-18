@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>UniverseSity Application</title>
+	<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.css" />
+	<link rel="stylesheet" href="css/universesity.css" />
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.mobile-1.2.0.js"></script>
+	<!-- <script type="text/javascript" src="js/dbtransaction.js"></script> -->
+	<script>
+		    var databaseOptions = {
+      filenombre: "UniverseSityDBI2",
+      version: "1.0",
+      displaynombre: "UniverseSityDBI2",
+      maxSize: 1024
+    };
+ 
+
+    var database = openDatabase(
+      databaseOptions.filenombre,
+      databaseOptions.version,
+      databaseOptions.displaynombre,
+      databaseOptions.maxSize
+    );
+ 
+    database.transaction(
+      function( transaction ){
+ 
+        transaction.executeSql(
+          "CREATE TABLE IF NOT EXISTS Materia (" +
+            "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+            "p_parcial INTEGER," +
+            "s_parcial INTEGER," +
+            "t_parcial INTEGER," +
+            "c_parcial INTEGER," +
+            "tareas INTEGER," +
+            "exposicion INTEGER," +
+            "acumulado INTEGER" +
+          ");"
+        );
+ 
+      }
+    );
+
+    var guardarNotas = function ( p_parcial, s_parcial, t_parcial, c_parcial, tareas, exposicion, callback){
+    	database.transaction(
+    		function ( transaction ) {
+
+    			transaction.executeSql(
+    				("INSERT INTO Materia (p_parcial, s_parcial, t_parcial, c_parcial, tareas, exposicion) VALUES (?,?,?,?,?,?)"),[p_parcial,s_parcial,t_parcial,c_parcial,tareas,exposicion],
+    				function(transaction, results){
+    					callback(results.insertId);
+    				}
+				);
+			}
+		);
+    };
+	
+     var getNotas = function( callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "SELECT " +
+                "* " +
+              "FROM " +
+                "Materia "
+            ),
+            [],
+            function( transaction, results ){
+              callback( results );
+            }
+          );
+ 
+        }
+      );
+    };
+	
+	     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT p_parcial FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var p_parcial = row.p_parcial;
+          }
+        );
+      }
+    );
+  }
+);
+
+     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT s_parcial FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var s_parcial = row.s_parcial;
+          }
+        );
+      }
+    );
+  }
+);
+
+     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT t_parcial FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var t_parcial = row.t_parcial;
+          }
+        );
+      }
+    );
+  }
+);
+
+     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT c_parcial FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var c_parcial = row.c_parcial;
+          }
+        );
+      }
+    );
+  }
+);
+
+     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT tareas FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var tareas = row.tareas;
+          }
+        );
+      }
+    );
+  }
+);
+
+     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT exposicion FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var exposicion = row.exposicion;
+          }
+        );
+      }
+    );
+  }
+);
+
+/*     database.transaction(function(transaction) {
+      transaction.executeSql('SELECT acumulado FROM Materia', [], function (transaction, results) {
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+            var Acumulado = row.acumulado;
+            alert(Acumulado);
+          }
+        );
+      }
+    );
+  }
+);*/
+
+/*var Acumulado = p_parcial + s_parcial + t_parcial + c_parcial + tareas + exposicion;  */
+
+     $(function(){
+      var form = $( "form" );
+ 
+      var list = $( "#Materias" );
+ 
+     /* var clearMaterias = $( "#clearMaterias" );*/
+ 
+ 
+      var refreshMaterias = function( results ){
+        list.empty();
+ 
+        if (!results){
+          return;
+        }
+ 
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+ 
+            list.append( "<ul><li><h3>Primer Parcial:</h3>" + row.p_parcial + "</li>" + "<li><h3>Segundo Parcial:</h3>" + row.s_parcial + "</li>" + "<li><h3>Tercer Parcial:</h3>" + row.t_parcial + "</li> " + "<li><h3>Cuarto Parcial:</h3>" + row.c_parcial + "</li> " + "<li><h3>Tareas:</h3>" + row.tareas + "</li>" + "<li><h3>Exposicion:</h3>" + row.exposicion + "</li>" + "<li><h3>Acumulado:</h3>" + Acumulado + "</li></ul>" );
+          }
+        );
+      };
+ 
+ 
+      form.submit(
+        function( event ){
+          event.preventDefault();
+ 
+          guardarNotas(
+            // $.("#p_parcial").val();
+            // jQuery
+            
+            form.find( "input.p_parcial" ).val(),
+            form.find( "input.s_parcial" ).val(),
+            form.find( "input.t_parcial" ).val(),
+            form.find( "input.c_parcial" ).val(),
+            form.find( "input.tareas" ).val(),
+            form.find( "input.exposicion" ).val(),
+            /*form.find( "input.acumulado" ).val(),*/
+            function(){
+              form.find( "input.p_parcial" )
+                .val( "" );
+              form.find( "input.s_parcial" )
+                .val( "" )
+              form.find( "input.t_parcial" )
+                .val( "" );
+              form.find( "input.c_parcial" )
+                .val( "" )
+              form.find( "input.tareas" )
+                .val( "" );
+              form.find( "input.exposicion" )
+                .val( "" )
+              /*form.find( "input.acumulado" )
+                .val( "" )*/
+                .focus()
+              ;
+              getNotas( refreshMaterias );
+
+              window.location="index.html";
+            }
+          );
+        }
+      );
+ 
+      getNotas( refreshMaterias );
+    });
+
+	</script>
+</head>
+<body>
+<div data-role="page" class="type-home">
+	<div data-role="content">
+		<div class="content-secondary">
+
+			<div id="jqm-homeheader">
+				<p><img src="images/logo.png" style="width:297px; height:52px"></p>
+			</div>
+
+
+			<div data-role="collapsible">
+		    <h3>Agregar Notas</h3>
+		    <p>Este formulario permite agregar notas ha una materia.</p>
+		    </div>
+			<form>
+        Primer Parcial:
+        <input type="number" nombre="p_parcial" class="p_parcial" id="p_parcial" value="" min="0" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"  /><br />
+        Segundo Parcial: 
+        <input type="number" nombre="s_parcial" class="s_parcial" id="s_parcial" value="" min="0" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"  /><br />
+        Tercer Parcial:
+        <input type="number" nombre="t_parcial" class="t_parcial" id="t_parcial" value="" min="0" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"  /><br />
+        Cuarto Parcial: 
+        <input type="number" nombre="c_parcial" class="c_parcial" id="c_parcial" value="" min="0" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" /><br />
+        Tareas:
+        <input type="number" nombre="tareas" class="tareas" id="tareas" value="" min="0" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"  /><br />
+        Exposicion:
+        <input type="number" nombre="exposicion" class="exposicion" id="exposicion" value="" min="0" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset"  /><br />
+        <!-- Acumulado: -->
+        <!-- <input type="number" nombre="acumulado" class="acumulado" id="acumulado" value="" min="100" max="125" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" /><br /> -->
+		<fieldset class="ui-grid-a">
+			<div class="ui-block-a"><div data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-icon="null" data-iconpos="null" data-theme="d" data-mini="true" class="ui-btn ui-btn-up-d ui-shadow ui-btn-corner-all ui-mini ui-submit" aria-disabled="false"><button type="submit" data-theme="d" data-mini="true" class="ui-btn-hidden" aria-disabled="false" data-rel="back">Cancelar</button></div></div>
+			<div class="ui-block-b"><div data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-icon="null" data-iconpos="null" data-theme="a" data-mini="true" class="ui-btn ui-shadow ui-btn-corner-all ui-mini ui-submit ui-btn-up-a" aria-disabled="false"><button type="submit" onclick="return true;" id="agregarMateria" data-theme="a" data-mini="true" class="ui-btn-hidden" aria-disabled="false">Agregar</button></div></div>
+	    </fieldset>
+	   </form>
+		</div>
+
+		</div><!--/content-primary-->
+		</div>
+
+
+
+	</div>
+
+</div>
+</body>
+</html>

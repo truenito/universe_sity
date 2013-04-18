@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>UniverseSity Application</title>
+	<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.css" />
+	<link rel="stylesheet" href="css/universesity.css" />
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.mobile-1.2.0.js"></script>
+	<script>
+	
+    var databaseOptions = {
+      filenombre: "UniverseSityDB",
+      version: "1.0",
+      displaynombre: "UniverseSityDB",
+      maxSize: 1024
+    };
+ 
+    var database = openDatabase(
+      databaseOptions.filenombre,
+      databaseOptions.version,
+      databaseOptions.displaynombre,
+      databaseOptions.maxSize
+    );
+ 
+    database.transaction(
+      function( transaction ){
+ 
+        transaction.executeSql(
+          "CREATE TABLE IF NOT EXISTS Pendientes (" +
+            "id_pendiente INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
+			"nombre VARCHAR NOT NULL," +
+            "descripcion TEXT NOT NULL," +
+            "estado CHAR NULL" + ");"
+        );
+ 
+      }
+    );
+ 
+    // -------------------------------------------------- //
+    // -------------------------------------------------- //
+ 
+ 
+    var guardarPendiente = function( nombre, descripcion, callback ){
+	
+      database.transaction(
+        function( transaction ){
+			 if(nombre != "" && descripcion != "")
+			 {		  
+			  transaction.executeSql(
+				("INSERT INTO Pendientes (nombre,descripcion) VALUES (?,?)"),[nombre,descripcion],
+				function( transaction, results ){
+				  callback( results.insertId );
+				}
+			  );
+			 }
+			
+        }
+      );
+    };
+ 
+    var getPendientes = function( callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "SELECT " +
+                "* " +
+              "FROM " +
+                "Pendientes " +
+              "ORDER BY " +
+                "nombre ASC"
+            ),
+            [],
+            function( transaction, results ){
+              callback( results );
+            }
+          );
+ 
+        }
+      );
+    };
+
+//     database.transaction(function(transaction) {
+//     transaction.executeSql('SELECT acumulado FROM Materia', [], function (transaction, results) {
+//         $.each(
+//           results.rows,
+//           function( rowIndex ){
+//             var row = results.rows.item( rowIndex );
+//             var Acumulado = row.acumulado;
+//             alert(Acumulado);
+//           }
+//         );
+// });
+// });
+
+ 
+ /*   var deletePendiente = function( id, callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "DELETE FROM Pendientes WHERE id=:id"
+            ),
+            [],
+            function(){
+              callback();
+            }
+          );
+ 
+        }
+      );
+    };  
+	*/
+	
+ 
+    // -------------------------------------------------- //
+    // -------------------------------------------------- //
+ 
+     $(function(){
+      var form = $( "form" ); 
+      //var list = $( "#Pendientes" ); 
+	  var tabla = $( "#tablePendientes > tbody:last" );
+      //var clearPendientes = $( "#clearPendientes" ); 
+      var refreshPendientes = function( results ){
+        tabla.empty(); 
+        if (!results){
+          return;
+        } 
+		
+		var i = 1;
+		var bg = '';
+		var d ='delete';
+		var e='edit';
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+	        if(i%2 != 0){bg = '#eeeeee;';} else{bg = '#ffffff;';}			
+      	    tabla.append("<tr style='background-color:"+bg+"'><td>" + row.nombre + "</td><td>" + row.descripcion + "</td><td><a href='agregarPendientes.html?id="+row.id_pendiente+"&action="+e+"' rel='external'><img src='images/edit.png' /> </a><a href='Pendientes.html?id="+row.id_pendiente+"&action="+d+"' rel='external'><img src='images/delete.png' id='delPendiente' /></a></td></tr>");
+            i++;
+				  
+          }
+        );
+      };
+ 
+      form.submit(
+        function( event ){
+          event.preventDefault();
+ 
+          guardarPendiente(
+            form.find( "input.nombre" ).val(),
+            form.find( "input.descripcion" ).val(),
+            function(){
+              form.find( "input.nombre" )
+			  .val( "" );
+              form.find( "input.descripcion" )
+			  .val( "" )
+			  .focus()
+			  ;
+              getPendientes( refreshPendientes );
+
+              window.location="pendientes.html";
+            }
+          );
+        }
+      );
+ 
+    /*  clearPendientes.click(
+        function( event ){
+          event.preventDefault();
+ 
+          deletePendientes( refreshPendientes );
+        }
+      );
+	  */
+ 
+      getPendientes( refreshPendientes );
+    });
+	
+	
+
+
+
+	</script>
+</head>
+<body>
+
+<div data-role="page" class="type-home">
+	<div data-role="content">
+
+		<div class="content-secondary">
+
+			<div id="jqm-homeheader">
+				<p><img src="images/logo.png" style="width:297px; height:52px"></p>
+			</div>
+
+
+			<div data-role="collapsible">
+		    <h3>Agregar Pendientes</h3>
+      <div data-role="header">
+        <a rel="external" href="pendientes.html" data-icon="back">Regresar</a>
+        <h1>Agregar pendientes</h1>
+      </div>
+		    <p>Este formulario permite agregar Asignaciones Pendientes.</p>
+		    </div>
+			<form>
+        Nombre:
+        <input type="text" nombre="nombre" class="nombre" /><br />
+        Descripcion: 
+        <input type="text" nombre="descripcion" class="descripcion" /><br />
+		<fieldset class="ui-grid-a">
+			<div class="ui-block-b"><div data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" data-icon="null" data-iconpos="null" data-theme="a" data-mini="true" class="ui-btn ui-shadow ui-btn-corner-all ui-mini ui-submit ui-btn-up-a" aria-disabled="false"><button type="submit" onclick="return true;" id="agregarMateria" data-theme="a" data-mini="true" class="ui-btn-hidden" aria-disabled="false">Agregar</button></div></div>
+	    </fieldset>
+	   </form>
+		</div>
+
+		</div><!--/content-primary-->
+		</div>
+
+
+
+	</div>
+
+</div>
+</body>
+</html>

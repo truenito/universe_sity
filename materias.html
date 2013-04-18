@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>UniverseSity Application</title>
+	<link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.css" />
+	<link rel="stylesheet" href="css/universesity.css" />
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery.mobile-1.2.0.js"></script>
+	<script>
+	    var databaseOptions = {
+      filenombre: "UniverseSityDB",
+      version: "1.0",
+      displaynombre: "UniverseSityDB",
+      maxSize: 1024
+    };
+ 
+    var database = openDatabase(
+      databaseOptions.filenombre,
+      databaseOptions.version,
+      databaseOptions.displaynombre,
+      databaseOptions.maxSize
+    );
+ 
+    // -------------------------------------------------- //
+    // -------------------------------------------------- //
+
+ 
+    var getMaterias = function( callback ){
+      database.transaction(
+        function( transaction ){
+ 
+          transaction.executeSql(
+            (
+              "SELECT " +
+                "* " +
+              "FROM " +
+                "Materia " +
+              "ORDER BY " +
+                "nombre ASC"
+            ),
+            [],
+            function( transaction, results ){
+              callback( results );
+            }
+          );
+ 
+        }
+      );
+    };
+ 
+    $(function(){
+      var form = $( "form" );
+      //var tabla = $( "#Materias" );
+	  var tabla = $( "#tablaMaterias > tbody:last" );
+      var clearMaterias = $( "#clearMaterias" );
+      var refreshMaterias = function( results ){
+        tabla.empty();
+        if (!results){
+          return;
+        }
+		var i = 1;
+		var bg = '';
+		var d ='delete';
+		var e='edit';
+	
+        $.each(
+          results.rows,
+          function( rowIndex ){
+            var row = results.rows.item( rowIndex );
+			if(i%2 != 0){bg = '#eeeeee;';} else{bg = '#ffffff;';}
+     	    tabla.append("<tr'><td><b><u>" + row.nombre + "</u></b></td></tr><tr style='background-color:"+bg+"'><td>Clave:<br />" + row.clave + "</td></tr><tr style='background-color:"+bg+"'>" +
+			"<td>Profesor: <br/>" + row.nombre_profesor + "</td></tr><tr style='background-color:"+bg+"'><td>Creditos: <br/>" + row.creditos + "</td></tr><tr style='background-color:"+bg+"'><td>Notas: <br/>" + row.notas + "</td></tr><tr style='background-color:"+bg+"'><td> Dias: <br />" + row.dias + "</td></tr><tr style='background-color:"+bg+"'><td>Acumulado: <br />" + row.acumulado + "</td><td><br /><br />");
+            i++;
+			
+			
+          }
+        );
+      };
+ 
+      form.submit(
+        function( event ){
+          event.preventDefault();
+          guardarMateria(
+            form.find( "input.nombre" ).val(),
+            form.find( "input.clave" ).val(),
+            form.find( "input.nombre_profesor" ).val(),
+            form.find( "input.creditos" ).val(),
+            form.find( "input.notas" ).val(),
+            form.find( "input.dias" ).val(),
+            form.find( "input.acumulado" ).val(),
+            function(){
+              form.find( "input.nombre" )
+                .val( "" );
+              form.find( "input.clave" )
+                .val( "" )
+              form.find( "input.nombre_profesor" )
+                .val( "" );
+              form.find( "input.creditos" )
+                .val( "" )
+              form.find( "input.notas" )
+                .val( "" );
+              form.find( "input.dias" )
+                .val( "" )
+              form.find( "input.acumulado" )
+                .val( "" )
+                .focus()
+              ;
+              getMaterias( refreshMaterias );
+              window.location="index.html";
+            }
+          );
+        }
+      );
+ 
+      clearMaterias.click(
+        function( event ){
+          event.preventDefault();
+          deleteMaterias( refreshMaterias );
+        }
+      );
+ 
+      getMaterias( refreshMaterias );
+    });
+	</script>
+</head>
+
+
+<body>
+<div data-role="page" class="type-home" data-nobackbtn="false">
+	<div data-role="content">
+		<div class="content-secondary">
+			<div id="jqm-homeheader">
+				<p><img src="images/logo.png" style="width:297px; height:52px"></p>
+			</div>
+			<p class="intro"> Bienvenido a <strong>UniverseSity</strong> una aplicación de PhoneGap desarrollada por los alumnos Gabriel González & Carlos Adames.</p>
+			<div data-role="header">
+				<a rel="external" href="index.html" data-icon="back">Regresar</a>
+				<h1>Materias</h1>
+				<a rel="external"href="agregar.html" data-icon="plus">Agregar</a>
+			</div>
+			  
+			<table width="100%" data-role="table" id="tablaMaterias" data-mode="columntoggle" class="ui-body-d ui-shadow table-stripe ui-responsive" data-column-btn-theme="b" data-column-btn-text="Columns to display..." data-column-popup-theme="a">
+			  <tbody>
+				
+			   </tbody>
+			</table>			
+			  
+		<div class="content-secondary">
+		</div><!--/content-primary-->
+		</div>
+	</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Capture Image</title>
+  <script type="text/javascript" charset="utf-8" src="cordova-2.5.0.js"></script>
+  <script type="text/javascript" charset="utf-8" src="json2.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UniverseSity Application</title>
+  <link rel="stylesheet" href="css/themes/default/jquery.mobile-1.2.0.css" />
+  <link rel="stylesheet" href="css/universesity.css" />
+  <script src="js/jquery.js"></script>
+  <script src="js/jquery.mobile-1.2.0.js"></script> 
+  <script src="assets/js/cordova-2.0.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+        function captureSuccess(mediaFiles) {
+            navigator.notification.alert('Exito', null, 'Fotos tomadas satisfactoriamente.');
+        }
+ 
+        function captureError(error) {
+            var msg = 'Hubo un error al abrir la camara: ' + error.code;
+            navigator.notification.alert(msg, null, 'Lo lamentamos!');
+        }
+
+        function captureImage() {
+            navigator.device.capture.captureImage(captureSuccess, captureError, { limit: 10 });
+        }
+    </script>
+
+
+    <script type="text/javascript" charset="utf-8">
+
+        var localizacionFoto;
+        var tipoDestino;
+
+        // Cordova conectandose al dispositivo
+        function onLoad() { document.addEventListener("deviceready", onDeviceReady, false); }
+
+        function onDeviceReady() {
+            localizacionFoto = navigator.camera.PictureSourceType;
+            tipoDestino = navigator.camera.DestinationType;
+        }
+
+        function onPhotoDataSuccess(imageData) {
+
+            var smallImage = document.getElementById('smallImage');
+
+            smallImage.style.display = 'block';
+            smallImage.src = "data:image/jpeg;base64," + imageData;
+        }
+
+        function onPhotoURISuccess(imageURI) {
+            var largeImage = document.getElementById('largeImage');
+
+            largeImage.style.display = 'block';
+
+            largeImage.src = imageURI;
+        }
+
+        function capturePhoto() {
+            navigator.camera.getPicture(onPhotoDataSuccess, onFail, {
+                quality: 50,
+                tipoDestino: tipoDestino.DATA_URL
+            });
+        }
+
+        function capturePhotoEdit() {
+            navigator.camera.getPicture(onPhotoDataSuccess, onFail, {
+                quality: 20, allowEdit: true,
+                tipoDestino: tipoDestino.DATA_URL
+            });
+        }
+
+        function getPhoto(source) {
+            navigator.camera.getPicture(onPhotoURISuccess, onFail, {
+                quality: 50,
+                tipoDestino: tipoDestino.FILE_URI,
+                sourceType: source
+            });
+        }
+
+        function onFail(message) {
+            alert('Fallo por que: ' + message);
+        }
+
+    </script>
+</head>
+<body onLoad="onLoad()">
+  <div data-role="page" class="type-home" data-nobackbtn="false">
+  <div data-role="content">
+    <div class="content-secondary">
+        <div data-role="header">
+            <a rel="external" href="index.html" data-icon="back">Regresar</a>
+        </div>
+      <div id="jqm-homeheader">
+        <p><img src="images/logo.png" style="width:297px; height:52px"></p>
+      </div>
+      <p class="intro"> Bienvenido a <strong>UniverseSity</strong> una aplicación de PhoneGap desarrollada por los alumnos Gabriel González, Miguel Vilar Carlos Adames.</p>
+      Prueba de camara:
+      </div>
+    <div class="content-secondary">
+      <button onclick="captureImage();">Capturar</button> <br>
+    </div><!--/content-primary-->
+    <button onclick="capturePhoto();">Tomar foto</button> <br><br>
+    <button onclick="capturePhotoEdit();">Editar foto</button> <br><br>
+    <button onclick="getPhoto(localizacionFoto.PHOTOLIBRARY);">Ver fotos de materias</button><br><br>
+    <img style="display:none;width:60px;height:60px;" id="smallImage" src="" />
+    <img style="display:none;" id="largeImage" src="" />
+  </div>
+</html>
